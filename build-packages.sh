@@ -11,9 +11,8 @@ fi
 sdkSetup () {
     export LC_ALL=C
 
-    # TODO: 
     ## copy over the repo keys
-    #cp scripts/sdk/key-build* $DIRNAME/
+    cp keys/key-build* $DIRNAME/
 
     ## setup the SDK feeds
     cd $DIRNAME
@@ -65,8 +64,7 @@ else
     echo "> Compile success"
 fi
 
-# TODO
 # sign packages
-# if [ "$TARGET_PACKAGE" = "all" ]; then
-#     make package/index
-# fi
+if [ "$TARGET_PACKAGE" = "all" ]; then
+    make package/index
+fi
