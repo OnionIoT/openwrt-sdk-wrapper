@@ -23,7 +23,8 @@ sdkSetup () {
 
     ## setup the SDK to compile the packages selected in our config file
     # TODO: test if copying over config file is necessary
-    cp ../config .config
+    #cp ../config/config .config
+    ## refresh the package config (selects all packages for compilation)
     make defconfig
 
     cd -

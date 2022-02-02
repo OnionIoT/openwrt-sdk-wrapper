@@ -23,4 +23,4 @@ mv $FILE $NEWNAME
 
 
 ## add our custom repos as a package feed
-cat onion.feeds.conf >> $NEWNAME/feeds.conf.default
+cat config/onion.feeds.conf >> $NEWNAME/feeds.conf.default
