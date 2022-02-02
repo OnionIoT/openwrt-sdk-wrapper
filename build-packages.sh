@@ -1,6 +1,12 @@
 #!/bin/bash
 
+COMPILATION_ERROR=0
 DIRNAME="openwrt-sdk"
+TARGET_PACKAGE="all"
+
+if [ "$1" != "" ]; then
+  TARGET_PACKAGE="$1"
+fi
 
 sdkSetup () {
     export LC_ALL=C
@@ -16,26 +22,53 @@ sdkSetup () {
     ./scripts/feeds install -a
 
     ## setup the SDK to compile the packages selected in our config file
+    # TODO: test if copying over config file is necessary
     cp ../config .config
     make defconfig
 
     cd -
 }
 
-buildPackages () {
-    cd $DIRNAME
-    make
+compilePackage () {
+  pkgName="$1"
+  make package/$pkgName/compile
 
-    if [ $? -ne 0 ]; then
-        echo "ERROR during package compilation!"
-        make -j1 V=s
-        echo "ERROR during package compilation! See logs above"
-        exit 1
-    fi
+  retval=$?
+  if [ $retval -ne 0 ]; then
+    make package/$pkgName/compile V=99
+    COMPILATION_ERROR=1
+    echo "\n>> ERROR: Compile of package ${pkgName} returned code $retval"
+  fi
+}
+
+compileAllPackages () {
+    compilePackage omega2-base
+    compilePackage onion-repo-keys
 }
 
 
 ###############################################################
 
 sdkSetup
-buildPackages
+cd $DIRNAME
+
+# compile
+if [ "$TARGET_PACKAGE" = "all" ]; then
+  compileAllPackages
+else
+  compilePackage "$TARGET_PACKAGE"
+fi
+
+# last step
+if [ $COMPILATION_ERROR -ne 0 ]; then
+    echo "\n>> PACKAGE COMPILATION ERROR!\n"
+    exit 1
+else
+    echo "> Compile success"
+fi
+
+# TODO
+# sign packages
+# if [ "$TARGET_PACKAGE" = "all" ]; then
+#     make package/index
+# fi
