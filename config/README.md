@@ -1,6 +1,6 @@
 # SDK Feed Configuration
 
-> The `setup.sh` script will append what's in the `onion.feeds.conf` file to the feed configuration file in the downloaded OpenWRT SDK.
+> The `setup.sh` script will append what's in the `new.feeds.conf` file to the feed configuration file in the downloaded OpenWRT SDK.
 
 Have two options when specifying feeds for the SDK:
 
@@ -9,7 +9,7 @@ Have two options when specifying feeds for the SDK:
 
 ## Default: Point to online package repository
 
-By default, the `onion.feeds.conf` file will point to the OnionIoT/OpenWRT-Packages repo on GitHub.
+By default, the `new.feeds.conf` file will point to the OnionIoT/OpenWRT-Packages repo on GitHub.
 
 This is useful for Continuous Integration.
 
@@ -17,7 +17,7 @@ This is useful for Continuous Integration.
 
 During development, there might be a need to pull package makefiles from a local source.
 
-In that case, change the contents of `onion.feeds.conf` to:
+In that case, change the contents of `new.feeds.conf` to:
 
 ```
 src-link custom <FEED-DIRECTORY-HERE>
