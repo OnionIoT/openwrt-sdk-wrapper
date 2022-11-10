@@ -23,7 +23,9 @@ The `build.sh` script:
 - All output will be in the `openwrt-sdk/bin/packages/mipsel_24kc/onion` directory
 - The `compileAllPackages` function in the script specifies which packages will be compiled
 
-# How to use this Repo for Development
+---
+
+# Using this Repo for Development
 
 By default, the packages are built from source code in git repo specified in `config/new.feeds.conf`.
 
