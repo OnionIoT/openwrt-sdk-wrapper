@@ -20,7 +20,7 @@ The `setup.sh` script:
 The `build.sh` script:
 
 - Will compile the specified packages and build a package index signed with the keys in the [`keys` directory](./keys) (learn more about package signing [here](https://openwrt.org/docs/guide-user/security/release_signatures) and [here](https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk))
-- All output will be in the `` directory
+- All output will be in the `openwrt-sdk/bin/packages/mipsel_24kc/onion` directory
 - The `compileAllPackages` function in the script specifies which packages will be compiled
 
 # How to use this Repo for Development
