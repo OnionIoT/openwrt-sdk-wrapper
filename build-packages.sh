@@ -1,7 +1,8 @@
 #!/bin/bash
 
+OPENWRT_VERSION="22.03.2"
 COMPILATION_ERROR=0
-DIRNAME="openwrt-sdk"
+DIRNAME="openwrt-sdk-${OPENWRT_VERSION}"
 TARGET_PACKAGE="all"
 
 if [ "$1" != "" ]; then

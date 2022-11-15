@@ -1,10 +1,13 @@
 #!/bin/bash
 
 ## download and unzip the SDK
-URL="https://downloads.openwrt.org/releases/21.02.1/targets/ramips/mt76x8"
-FILE="openwrt-sdk-21.02.1-ramips-mt76x8_gcc-8.4.0_musl.Linux-x86_64"
+OPENWRT_VERSION="22.03.2"
+TARGET="ramips"
+SUBTARGET="mt76x8"
+URL="https://downloads.openwrt.org/releases/$OPENWRT_VERSION/targets/$TARGET/$SUBTARGET"
+FILE="openwrt-sdk-$OPENWRT_VERSION-$TARGET-${SUBTARGET}_gcc-11.2.0_musl.Linux-x86_64"
 ZIP="${FILE}.tar.xz"
-NEWNAME="openwrt-sdk"
+NEWNAME="openwrt-sdk-$OPENWRT_VERSION"
 
 # remove previously configured sdk
 rm -rf $NEWNAME
