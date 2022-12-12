@@ -1,66 +1,38 @@
+#  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+#  SPDX-License-Identifier: MIT-0
 version: 0.2
-
-#env:
-  #variables:
-     # key: "value"
-     # key: "value"
-  #parameter-store:
-     # key: "value"
-     # key: "value"
-  #secrets-manager:
-     # key: secret-id:json-key:version-stage:version-id
-     # key: secret-id:json-key:version-stage:version-id
-  #exported-variables:
-     # - variable
-     # - variable
-  #git-credential-helper: yes
-#batch:
-  #fast-fail: true
-  #build-list:
-  #build-matrix:
-  #build-graph:
+env:
+  variables:
+    VERSION: "22.03.2"
 phases:
-  #install:
-    #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
-    #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
-    #runtime-versions:
-      # name: version
-      # name: version
-    #commands:
-      # - command
-      # - command
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo "Installing dependencies"
+      - apt-get update
+      - apt-get -y install --upgrade awscli
+      - apt-get -y install build-essential libncurses5-dev libncursesw5-dev zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python2
   pre_build:
     commands:
-      - cp $CODEBUILD_SRC_DIR_build_files/openwrt21.key ./keys/key-build
-      - cp $CODEBUILD_SRC_DIR_build_files/openwrt21.pub ./keys/key-build.pub
+      - aws s3 cp s3://onion-build/openwrt/openwrt21.key $CODEBUILD_SRC_DIR/keys/key-build
+      - aws s3 cp s3://onion-build/openwrt/openwrt21.pub $CODEBUILD_SRC_DIR/keys/key-build.pub
+      - cd $CODEBUILD_SRC_DIR
       - bash setup.sh
-      # - command
   build:
     commands:
       - bash build-packages.sh
-      # - command
-  #post_build:
-    #commands:
-      # - command
-      # - command
-#reports:
-  #report-name-or-arn:
-    #files:
-      # - location
-      # - location
-    #base-directory: location
-    #discard-paths: yes
-    #file-format: JunitXml | CucumberJson
+  post_build:
+    commands:
+      - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi
+      - cd "openwrt-sdk-$VERSION/bin/packages/mipsel_24kc/onion"
+      - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2/packages/openwrt-$VERSION/onion"
+cache:
+  paths:
+    - /var/cache/apt/**/*
+    - /var/lib/apt/lists/**/*
+
 artifacts:
-  files:
-    - '**/*'
-  base-directory: 'openwrt-sdk/bin/packages/mipsel_24kc/onion'
-  #files:
-    # - location
-    # - location
-  #name: $(date +%Y-%m-%d)
-  #discard-paths: yes
-  #base-directory: location
-#cache:
-  #paths:
-    # - paths
+  type: zip
+  files: "**/*"
+  base-directory: "openwrt-sdk-$VERSION/bin/packages/mipsel_24kc/onion"
