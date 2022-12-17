@@ -4,22 +4,15 @@ cd $(dirname $0)
 
 . ./profile
 
-FILES_DIR="$PWD/files"
-
 [ -z "$OPENWRT_VERSION" ] && exit 1
 [ -z "$TARGET" ] && exit 1
 [ -z "$SUBTARGET" ] && exit 1
 
-BUILD_DIR="$PWD/build/openwrt-$OPENWRT_VERSION/$TARGET/$SUBTARGET"
-mkdir -p "$BUILD_DIR"
+BUILD_DIR="$PWD"
 
-TARGET_SDK_DIR="$BUILD_DIR/sdk"
+TARGET_SDK_DIR="$BUILD_DIR/openwrt-sdk"
 SDK_ZIP="$BUILD_DIR/${SDK_URL##*/}"
 SDK_FILE="${SDK_ZIP//.tar.xz}"
-
-TARGET_IMAGE_BUILDER_DIR="$BUILD_DIR/imagebuilder"
-IMAGE_BUILDER_ZIP="$BUILD_DIR/${IMAGE_BUILDER_URL##*/}"
-IMAGE_BUILDER_FILE="${IMAGE_BUILDER_ZIP//.tar.xz}"
 
 download_file() {
 	local url=$1
@@ -59,8 +52,20 @@ extract_archive() {
 	return 0
 }
 
-download_sdk() {
-	download_file "$SDK_URL" "$SDK_ZIP"
+sdk_exist() {
+	[ -d "$TARGET_SDK_DIR" ] && return 0
+
+	echo "SDK not found. To prepare SDK run"
+	echo "$0 setup_sdk"
+
+	return 1
+}
+
+clean_sdk() {
+	sdk_exist || return 1
+
+	[ -d "$TARGET_SDK_DIR" ] && rm -rf "$TARGET_SDK_DIR"
+	[ -f "$SDK_ZIP" ] && rm -f "$SDK_ZIP"
 }
 
 verify_sdk() {
@@ -69,20 +74,22 @@ verify_sdk() {
 
 extract_sdk() {
 	extract_archive "$BUILD_DIR" "$SDK_ZIP" || return 1
-
-	[ -z "$TARGET_SDK_DIR" ] && return 1
-	[ -n "$TARGET_SDK_DIR" ] && [ -d "$TARGET_SDK_DIR" ] && rm -rf "$TARGET_SDK_DIR"
-
+	clean_sdk
 	mv "$SDK_FILE" "$TARGET_SDK_DIR" || return 1
-
 	return 0
+}
+
+download_sdk() {
+	download_file "$SDK_URL" "$SDK_ZIP"
 }
 
 prepare_sdk() {
 	export LC_ALL=C
 
 	## copy over the repo keys
-	cp keys/key-build* $TARGET_SDK_DIR
+	if [ -n "$KEYS_DIR" ] && [ -d "$KEYS_DIR" ]; then
+		cp $KEYS_DIR/key-build* $TARGET_SDK_DIR
+	fi
 
 	$TARGET_SDK_DIR/scripts/feeds update -a
 	$TARGET_SDK_DIR/scripts/feeds install -a
@@ -101,40 +108,8 @@ update_package_feeds() {
 	return 0
 }
 
-download_builder() {
-	download_file "$IMAGE_BUILDER_URL" "$IMAGE_BUILDER_ZIP"
-}
-
-verify_builder() {
-	verify_archive "$IMAGE_BUILDER_ZIP"
-}
-
-extract_builder() {
-	extract_archive "$BUILD_DIR" "$IMAGE_BUILDER_ZIP" || return 1
-
-	[ -z "$TARGET_IMAGE_BUILDER_DIR" ] && return 1
-	[ -n "$TARGET_IMAGE_BUILDER_DIR" ] && [ -d "$TARGET_IMAGE_BUILDER_DIR" ] && rm -rf "$TARGET_IMAGE_BUILDER_DIR"
-
-	mv "$IMAGE_BUILDER_FILE" "$TARGET_IMAGE_BUILDER_DIR" || return 1
-
-	return 0
-}
-
-update_package_repos() {
-	## add packages
-
-	[ -z "$PACKAGE_REPOS" ] && return 0
-
-	echo -e "$PACKAGE_REPOS" >> $TARGET_IMAGE_BUILDER_DIR/repositories.conf
-
-	return 0
-}
-
-setup_imagebuilder() {
-	download_builder || return 1
-	verify_builder || return 1
-	extract_builder || return 1
-	update_package_repos || return 1
+update_sdk() {
+	prepare_sdk || return 1
 }
 
 setup_sdk() {
@@ -160,9 +135,16 @@ compile_package() {
 	fi
 }
 
+list_packages() {
+	sdk_exist || return 1
+	$TARGET_SDK_DIR/scripts/feeds list $@
+}
+
 build_packages() {
 	local packages="$@"
 	local pkg
+
+	sdk_exist || return 1
 
 	packages="${packages:-${SDK_PACKAGES}}"
 
@@ -179,63 +161,54 @@ build_packages() {
 }
 
 index_packages() {
+	sdk_exist || return 1
+
 	make -C "$TARGET_SDK_DIR" package/index
 }
 
-build_image() {
-	local files profile
+build_all_packages() {
+	sdk_exist || return 1
 
-	profile=$1
-	[ -d "$FILES_DIR" ] && files="FILE=$FILES_DIR"
-
-	if [ -z "$IMAGE_BUILDER_PACKAGES" ]; then
-		make -C "$TARGET_IMAGE_BUILDER_DIR" image PROFILE=$profile $files
-	else
-		make -C "$TARGET_IMAGE_BUILDER_DIR" image PROFILE=$profile PACKAGES="$packages" $files
-	fi
-
-	if [ $? -ne 0 ]; then
-		echo "ERROR during image building for $profile"
-		return 1
-	fi
-
+	build_packages
+	index_packages
 }
 
-build_firmware() {
-	local profiles="$@"
-	local prof
+if [ -z "$TARGET_SDK_DIR" ]; then
+	echo "TARGET_SDK_DIR can not be empty string"
+	exit 1
+fi
 
-	profiles="${profiles:-${BUILD_PROFILES}}"
+commands="
+setup_sdk
+update_sdk
+clean_sdk
+list_packages
+build_packages
+build_all_packages
+index_packages
+"
 
-	for prof in $profiles; do
-		if build_image "$prof"; then
-			echo "> Compiled firmware at $TARGET_IMAGE_BUILDER_DIR/bin/targets/$TARGET/$SUBTARGET/"
-		else
-			echo "> Compilation error!"
-			return 1
-		fi
+usage_help() {
+	local cmd
+
+	echo "$0: "
+
+	for cmd in $commands; do
+		echo -e "\t$cmd"
 	done
 }
 
-case "$1" in
-	setup_sdk)
-		setup_sdk || exit 1
-		;;
-	build_package)
-		shift
-		build_packages $@ || exit 1
-		;;
-	index_packages)
-		index_packages || exit 1
-		;;
-	setup_imagebuilder)
-		setup_imagebuilder || exit 1
-		;;
-	build_fw)
-		shift
-		build_firmware $@ || exit 1
-		;;
-	*)
-		echo "Invalid option"
-		exit 1
-esac
+if [ $# -lt 1 ]; then
+	usage_help
+	exit 1
+fi
+
+if [ "$(type -t $1)" != "function" ]; then
+	echo "$1: function not found"
+	usage_help
+	exit 1
+fi
+
+cmd=$1
+shift
+$cmd $@
