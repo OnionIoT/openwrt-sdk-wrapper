@@ -20,11 +20,6 @@ PACKAGE_FEEDS="
 src-git onion https://github.com/OnionIoT/OpenWRT-Packages.git;openwrt-22.03
 "
 
-# Uncomment if package has to be compiled from local packages directory.
-# PACKAGE_FEEDS="
-# src-link onion /home/ubuntu/OpenWRT-Packages
-# "
-
 # Packages to be compiled by default (each package in new line. This would directory name containing Makefile of respective package)
 # Each package in a new line
 SDK_PACKAGES="
