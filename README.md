@@ -4,10 +4,12 @@ Supporting scripts and config to **easily build OpenWRT packages using the [Open
 
 # How to use this Repo
 
-> By default, this repo is setup to build OpenWRT packages (based on source code in a Git repo) for deployment. 
+> By default, this repo is setup to build OpenWRT packages (based on source code in a Git repo) for deployment.
 
 1. Run `bash onion_buildenv setup_sdk` to download and setup the OpenWRT SDK
-2. Run `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` to build the desired packages
+2. Two options here:
+  1. Run `bash onion_buildenv build_all_packages` to build all packages listed in the `SDK_PACKAGES` variable in `profile`
+  1. Run `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` to build the specified packages
 3. Find compiled package ipk files at `openwrt-sdk/bin/packages/mipsel_24kc/onion`
 
 ## Details
@@ -17,9 +19,9 @@ The `bash onion_buildenv setup_sdk` command:
 - Will download and setup the OpenWRT SDK
 - Add the custom feeds specified as env variable `PACKAGE_FEEDS` in a build `profile` to the SDK
 
-The `bash onion_buildenv build_packages <pkg1>` command:
+The `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` command:
 
-- Will compile the specified packages
+- Will compile the packages in the `<pkg1> <pkg2> ... <pkgN>` arguments
 
 The `bash onion_buildenv build_all_packages` command:
 
@@ -44,8 +46,8 @@ To work from a local copy of your source code:
 5. Run `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` to build the desired packages
 6. Find your compiled packages in the `openwrt-sdk/bin/packages/mipsel_24kc/<feed>/` directory
 7. Test compiled packages on the device. If more code changes are required, start again from step 3.
-        
-        
+
+
 ## Example
 
 If we wanted to build the packages from the Onion OpenWRT-Packages repo for development, the steps would be as follows:
@@ -53,7 +55,7 @@ If we wanted to build the packages from the Onion OpenWRT-Packages repo for deve
 1. clone your package source code repo to your development machine
     * Clone the repo: `git clone https://github.com/OnionIoT/OpenWRT-Packages.git` **note the path to the cloned directory**, in our case it's `/home/ubuntu/OpenWRT-Packages`
     * Checkout desired branch if required
-2. Update env variable `PACKAGE_FEEDS` in a `profile`: 
+2. Update env variable `PACKAGE_FEEDS` in a `profile`:
     * set a value: `PACKAGE_FEEDS="src-link custom /home/ubuntu/OpenWRT-Packages"`, since `/home/ubuntu/OpenWRT-Packages` is the absolute path to the cloned directory from step 1
 3. Make any changes to the package source files in `/home/ubuntu/OpenWRT-Packages`
 4. Run `bash onion_buildenv setup_sdk` to download and setup the OpenWRT SDK
