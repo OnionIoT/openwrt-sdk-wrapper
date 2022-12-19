@@ -18,10 +18,10 @@ phases:
       - aws s3 cp s3://onion-build/openwrt/openwrt21.key $CODEBUILD_SRC_DIR/keys/key-build
       - aws s3 cp s3://onion-build/openwrt/openwrt21.pub $CODEBUILD_SRC_DIR/keys/key-build.pub
       - cd $CODEBUILD_SRC_DIR
-      - bash setup.sh
+      - bash onion_buildenv setup_sdk
   build:
     commands:
-      - bash build-packages.sh
+      - bash onion_buildenv build_all_packages
   post_build:
     commands:
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi
