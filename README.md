@@ -24,7 +24,7 @@ The `bash onion_buildenv build_packages <pkg1>` command:
 The `bash onion_buildenv build_all_packages` command:
 
 - Will compile all the packages specified as env variable `SDK_PACKAGES` in a build `profile` to the SDK
-- Will build a package index signed with the keys in the [`KEYS_DI   directory](./keys) (learn more about package signing [here](https://openwrt.org/docs/guide-user/security/release_signatures) and [here](https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk))
+- Will build a package index signed with the keys in the [`keys/` directory](./keys) (learn more about package signing [here](https://openwrt.org/docs/guide-user/security/release_signatures) and [here](https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk))
 - All output will be in the `openwrt-sdk/bin/packages/mipsel_24kc/onion` directory
 
 ---
