@@ -1,0 +1,213 @@
+#!/bin/bash
+
+cd $(dirname $0)
+
+. ./profile
+
+[ -z "$OPENWRT_VERSION" ] && exit 1
+[ -z "$TARGET" ] && exit 1
+[ -z "$SUBTARGET" ] && exit 1
+
+BUILD_DIR="$PWD"
+
+TARGET_SDK_DIR="$BUILD_DIR/openwrt-sdk"
+SDK_ZIP="$BUILD_DIR/${SDK_URL##*/}"
+SDK_FILE="${SDK_ZIP//.tar.xz}"
+
+download_file() {
+	local url=$1
+	local output=$2
+
+	[ -e $output ] && return 0
+
+	if ! curl "$url" -o "$output"; then
+		echo "ERROR downloading from $url"
+		return 1
+	fi
+
+	return 0
+}
+
+verify_archive() {
+	local file=$1
+
+	if ! tar tJf "$file" > /dev/null; then
+		echo "ERROR: invalid archive $file"
+		return 1
+	fi
+
+	return 0
+
+}
+
+extract_archive() {
+	local dir=$1
+	local file=$2
+
+	if ! tar -C "$dir" -xJf "$file"; then
+		echo "ERROR: decompression failed for $file"
+		return 1
+	fi
+
+	return 0
+}
+
+sdk_exist() {
+	[ -d "$TARGET_SDK_DIR" ] && return 0
+
+	echo "SDK not found. To prepare SDK run"
+	echo "$0 setup_sdk"
+
+	return 1
+}
+
+clean_sdk() {
+	[ -d "$TARGET_SDK_DIR" ] && rm -rf "$TARGET_SDK_DIR"
+	[ -f "$SDK_ZIP" ] && rm -f "$SDK_ZIP"
+}
+
+verify_sdk() {
+	verify_archive "$SDK_ZIP"
+}
+
+extract_sdk() {
+	extract_archive "$BUILD_DIR" "$SDK_ZIP" || return 1
+	clean_sdk
+	mv "$SDK_FILE" "$TARGET_SDK_DIR" || return 1
+	return 0
+}
+
+download_sdk() {
+	download_file "$SDK_URL" "$SDK_ZIP"
+}
+
+prepare_sdk() {
+	export LC_ALL=C
+
+	## copy over the repo keys
+	if [ -n "$KEYS_DIR" ] && [ -d "$KEYS_DIR" ]; then
+		cp $KEYS_DIR/key-build* $TARGET_SDK_DIR
+	fi
+
+	$TARGET_SDK_DIR/scripts/feeds update -a
+	$TARGET_SDK_DIR/scripts/feeds install -a
+
+	## refresh the package config (selects all packages for compilation)
+	make -C "$TARGET_SDK_DIR" defconfig
+}
+
+update_package_feeds() {
+	## add packages feeds
+
+	[ -z "$PACKAGE_FEEDS" ] && return 0
+
+	echo -e "$PACKAGE_FEEDS" >> $TARGET_SDK_DIR/feeds.conf.default
+
+	return 0
+}
+
+update_sdk() {
+	sdk_exist || return 1
+	prepare_sdk || return 1
+}
+
+setup_sdk() {
+	download_sdk || return 1
+	verify_sdk || return 1
+	extract_sdk || return 1
+	update_package_feeds || return 1
+	prepare_sdk || return 1
+}
+
+compile_package() {
+	local pkg="$1"
+
+	make -C "$TARGET_SDK_DIR" package/$pkg/compile
+
+	retval=$?
+	if [ $retval -ne 0 ]; then
+		make -C "$TARGET_SDK_DIR" package/$pkg/compile V=99
+		COMPILATION_ERROR=1
+		echo "\n>> ERROR: Compile of package ${pkg} returned code $retval"
+	else
+		COMPILATION_ERROR=0
+	fi
+}
+
+list_packages() {
+	sdk_exist || return 1
+	$TARGET_SDK_DIR/scripts/feeds list $@
+}
+
+build_packages() {
+	local packages="$@"
+	local pkg
+
+	sdk_exist || return 1
+
+	packages="${packages:-${SDK_PACKAGES}}"
+
+	for pkg in $packages; do
+		compile_package "$pkg"
+	done
+
+	if [ $COMPILATION_ERROR -ne 0 ]; then
+		echo "\n>> PACKAGE COMPILATION ERROR!\n"
+		return 1
+	else
+		echo "> Compile success"
+	fi
+}
+
+index_packages() {
+	sdk_exist || return 1
+
+	make -C "$TARGET_SDK_DIR" package/index
+}
+
+build_all_packages() {
+	sdk_exist || return 1
+
+	build_packages
+	index_packages
+}
+
+if [ -z "$TARGET_SDK_DIR" ]; then
+	echo "TARGET_SDK_DIR can not be empty string"
+	exit 1
+fi
+
+commands="
+setup_sdk
+update_sdk
+clean_sdk
+list_packages
+build_packages
+build_all_packages
+index_packages
+"
+
+usage_help() {
+	local cmd
+
+	echo "$0: "
+
+	for cmd in $commands; do
+		echo -e "\t$cmd"
+	done
+}
+
+if [ $# -lt 1 ]; then
+	usage_help
+	exit 1
+fi
+
+if [ "$(type -t $1)" != "function" ]; then
+	echo "$1: function not found"
+	usage_help
+	exit 1
+fi
+
+cmd=$1
+shift
+$cmd $@
