@@ -35,4 +35,4 @@ cache:
 artifacts:
   type: zip
   files: "**/*"
-  base-directory: "openwrt-sdk-$VERSION/bin/packages/mipsel_24kc/onion"
+  base-directory: "openwrt-sdk/bin/packages/mipsel_24kc/onion"
