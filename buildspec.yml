@@ -25,7 +25,7 @@ phases:
   post_build:
     commands:
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi
-      - cd "openwrt-sdk-$VERSION/bin/packages/mipsel_24kc/onion"
+      - cd "openwrt-sdk/bin/packages/mipsel_24kc/onion"
       - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2/packages/openwrt-$VERSION/onion"
 cache:
   paths:
