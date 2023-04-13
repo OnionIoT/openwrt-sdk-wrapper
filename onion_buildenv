@@ -101,13 +101,14 @@ update_package_feeds() {
 
 	[ -z "$PACKAGE_FEEDS" ] && return 0
 
-	echo -e "$PACKAGE_FEEDS" >> $TARGET_SDK_DIR/feeds.conf.default
+	echo -e "${PACKAGE_FEEDS}" >> $TARGET_SDK_DIR/feeds.conf.default
 
 	return 0
 }
 
 update_sdk() {
 	sdk_exist || return 1
+	update_package_feeds
 	prepare_sdk || return 1
 }
 

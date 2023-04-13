@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Stable OpenWrt Release version (Needs change whenever new openwrt release is available)
-OPENWRT_VERSION="22.03.2"
+OPENWRT_VERSION="22.03.3"
 TARGET="ramips"
 SUBTARGET="mt76x8"
 
