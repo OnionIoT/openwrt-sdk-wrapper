@@ -1,9 +1,6 @@
 #  Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 #  SPDX-License-Identifier: MIT-0
 version: 0.2
-env:
-  variables:
-    VERSION: "22.03.2"
 phases:
   install:
     runtime-versions:
@@ -25,6 +22,7 @@ phases:
   post_build:
     commands:
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi
+      - VERSION=$(. $CODEBUILD_SRC_DIR/profile; echo ${OPENWRT_VERSION=#v})
       - cd "openwrt-sdk/bin/packages/mipsel_24kc/onion"
       - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2/packages/openwrt-$VERSION/onion"
 cache:
