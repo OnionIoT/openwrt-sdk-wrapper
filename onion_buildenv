@@ -169,8 +169,8 @@ index_packages() {
 build_all_packages() {
 	sdk_exist || return 1
 
-	build_packages
-	index_packages
+	build_packages || return 1
+	index_packages || return 1
 }
 
 if [ -z "$TARGET_SDK_DIR" ]; then
