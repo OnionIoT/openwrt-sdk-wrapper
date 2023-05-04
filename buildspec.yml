@@ -7,7 +7,7 @@ phases:
       - echo "Installing dependencies"
       - apt-get update
       - apt-get -y install build-essential libncurses5-dev libncursesw5-dev zlib1g-dev gawk git gettext libssl-dev xsltproc rsync wget unzip python2 python3
-      - apt -y install --upgrade awscli
+      - apt-get -y install --upgrade awscli
       # remove pyenv from path to use the default system installation.
       - export PATH=$(echo $PATH | sed 's@/root/.pyenv/shims:/root/.pyenv/bin:@@g')
   pre_build:
