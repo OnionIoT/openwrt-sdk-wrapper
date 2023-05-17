@@ -74,6 +74,7 @@ extract_sdk() {
 	extract_archive "$BUILD_DIR" "$SDK_ZIP" || return 1
 	clean_sdk
 	mv "$SDK_FILE" "$TARGET_SDK_DIR" || return 1
+	cp $TARGET_SDK_DIR/feeds.conf.default $TARGET_SDK_DIR/feeds.conf.default.org
 	return 0
 }
 
@@ -101,15 +102,17 @@ update_package_feeds() {
 
 	[ -z "$PACKAGE_FEEDS" ] && return 0
 
-	echo -e "${PACKAGE_FEEDS}" >> $TARGET_SDK_DIR/feeds.conf.default
+	echo -e "${PACKAGE_FEEDS}" > $TARGET_SDK_DIR/feeds.conf.default
+	cat $TARGET_SDK_DIR/feeds.conf.default.org >> $TARGET_SDK_DIR/feeds.conf.default
+
+	prepare_sdk || return 1
 
 	return 0
 }
 
 update_sdk() {
 	sdk_exist || return 1
-	update_package_feeds
-	prepare_sdk || return 1
+	update_package_feeds || return 1
 }
 
 setup_sdk() {
