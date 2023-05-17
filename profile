@@ -25,4 +25,5 @@ src-git onion https://github.com/OnionIoT/OpenWRT-Packages.git;openwrt-22.03
 SDK_PACKAGES="
 onion-repo-keys
 omega2-base
+omega2-ctrl
 "
