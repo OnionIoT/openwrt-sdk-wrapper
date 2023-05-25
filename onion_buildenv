@@ -120,7 +120,6 @@ setup_sdk() {
 	verify_sdk || return 1
 	extract_sdk || return 1
 	update_package_feeds || return 1
-	prepare_sdk || return 1
 }
 
 compile_package() {
