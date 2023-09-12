@@ -26,4 +26,5 @@ SDK_PACKAGES="
 onion-repo-keys
 omega2-base
 omega2-ctrl
+onion-dt-overlay
 "
