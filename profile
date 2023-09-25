@@ -27,4 +27,5 @@ onion-repo-keys
 omega2-base
 omega2-ctrl
 onion-dt-overlay
+python3-spidev
 "
