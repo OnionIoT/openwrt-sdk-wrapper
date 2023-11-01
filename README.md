@@ -2,6 +2,10 @@
 
 Supporting scripts and config to **easily build OpenWRT packages using the [OpenWRT SDK](https://openwrt.org/docs/guide-developer/toolchain/using_the_sdk)**
 
+## System Requirements
+
+We recommend using **Ubuntu 22.04** Linux to build this repo. See the [OpenWRT Build System Setup instructions](https://openwrt.org/docs/guide-developer/toolchain/install-buildsystem#debianubuntu) for details on what packages are required.
+
 # How to use this Repo
 
 > By default, this repo is setup to build OpenWRT packages (based on source code in a Git repo) for deployment.
