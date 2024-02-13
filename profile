@@ -1,7 +1,8 @@
 #!/bin/sh
 
 # Stable OpenWrt Release version (Needs change whenever new openwrt release is available)
-OPENWRT_VERSION="22.03.5"
+OPENWRT_RELEASE="22.03"
+OPENWRT_VERSION="${OPENWRT_RELEASE}.5"
 TARGET="ramips"
 SUBTARGET="mt76x8"
 
@@ -17,7 +18,7 @@ KEYS_DIR="$PWD/keys"
 
 ## specify package feeds to be included in sdk (each feed in new line)
 PACKAGE_FEEDS="
-src-git onion https://github.com/OnionIoT/OpenWRT-Packages.git;openwrt-22.03
+src-git onion https://github.com/OnionIoT/OpenWRT-Packages.git;openwrt-${OPENWRT_RELEASE}
 "
 
 # Packages to be compiled by default (each package in new line. This would directory name containing Makefile of respective package)
