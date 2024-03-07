@@ -17,7 +17,7 @@ phases:
       
       - cat $CODEBUILD_SRC_DIR/profile
       - cp $CODEBUILD_SRC_DIR_packages_source_output/sdk-profile $CODEBUILD_SRC_DIR/profile
-      
+
       - cd $CODEBUILD_SRC_DIR
       - cat profile
 
@@ -30,7 +30,7 @@ phases:
       - if [ "$CODEBUILD_BUILD_SUCCEEDING" = "0" ]; then exit 1; fi
       - VERSION=$(. $CODEBUILD_SRC_DIR/profile; echo ${OPENWRT_VERSION=#v})
       - cd "openwrt-sdk/bin/packages/mipsel_24kc/onion"
-      - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2-dev/packages/openwrt-$VERSION/onion"
+      - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2/packages/openwrt-$VERSION/onion"
 cache:
   paths:
     - /var/cache/apt/**/*
