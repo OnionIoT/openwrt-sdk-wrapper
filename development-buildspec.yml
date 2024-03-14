@@ -20,7 +20,7 @@ phases:
       
       - cd $CODEBUILD_SRC_DIR
       - cat profile
-
+      - export DEV_BUILD=true
       - bash onion_buildenv setup_sdk
   build:
     commands:
