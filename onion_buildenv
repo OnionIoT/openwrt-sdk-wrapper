@@ -43,7 +43,6 @@ verify_archive() {
 extract_archive() {
 	local dir=$1
 	local file=$2
-	echo "> Extracting compressed SDK"
 
 	if ! tar -C "$dir" -xJf "$file"; then
 		echo "ERROR: decompression failed for $file"
@@ -73,6 +72,7 @@ verify_sdk() {
 }
 
 extract_sdk() {
+	echo "> Extracting compressed SDK"
 	extract_archive "$BUILD_DIR" "$SDK_ZIP" || return 1
 	clean_sdk
 	mv "$SDK_FILE" "$TARGET_SDK_DIR" || return 1
@@ -102,7 +102,7 @@ prepare_sdk() {
 
 update_package_feeds() {
 	## add packages feeds
-	echo "> Updating SDK Package Feeds"
+	echo "> Updating SDK Package Feeds and preparing SDK"
 
 	[ -z "$PACKAGE_FEEDS" ] && return 0
 
