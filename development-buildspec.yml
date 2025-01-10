@@ -31,6 +31,9 @@ phases:
       - VERSION=$(. $CODEBUILD_SRC_DIR/profile; echo ${OPENWRT_VERSION=#v})
       - cd "openwrt-sdk/bin/packages/mipsel_24kc/onion"
       - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2-dev/packages/openwrt-$VERSION/onion"
+      - cd -
+      - cd "openwrt-sdk/bin/targets/ramips/mt76x8/packages"
+      - aws s3 cp --recursive . "s3://$OUTPUT_BUCKET/omega2-dev/packages/openwrt-$VERSION/core"
 cache:
   paths:
     - /var/cache/apt/**/*
