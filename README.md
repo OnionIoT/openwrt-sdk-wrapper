@@ -11,10 +11,10 @@ We recommend using **Ubuntu 22.04** Linux to build this repo. See the [OpenWRT B
 > By default, this repo is setup to build OpenWRT packages (based on source code in a Git repo) for deployment.
 
 1. Run `bash onion_buildenv setup_sdk` to download and setup the OpenWRT SDK
-2. Two options here:
-  1. Run `bash onion_buildenv build_all_packages` to build all packages listed in the `SDK_PACKAGES` variable in `profile`
-  1. Run `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` to build the specified packages
-3. Find compiled package ipk files at `openwrt-sdk/bin/packages/mipsel_24kc/onion`
+1. Two options here:
+    1. Run `bash onion_buildenv build_all_packages` to build all packages listed in the `SDK_PACKAGES` variable in `profile`
+    1. Run `bash onion_buildenv build_packages <pkg1> <pkg2> ... <pkgN>` to build the specified packages
+1. Find compiled package ipk files at `openwrt-sdk/bin/packages/mipsel_24kc/onion`
 
 ## Details
 
